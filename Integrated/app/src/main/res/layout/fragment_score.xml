@@ -1,0 +1,25 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/cream_bg"
+    android:padding="16dp">
+
+    <!-- Vertical RecyclerView for Activities -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/scoresRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/analyzeProgressButton"
+        android:nestedScrollingEnabled="false" />
+
+    <!-- Analyze Progress Button -->
+    <Button
+        android:id="@+id/analyzeProgressButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Analyze Progress"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/orange_background" />
+
+</RelativeLayout>

@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    android:layout_marginBottom="10dp"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="@drawable/text_view_border">
+
+    <TextView
+        android:id="@+id/activityNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-medium"
+        android:paddingBottom="8dp" />
+
+    <!-- Horizontal RecyclerView for Levels -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/levelsRecyclerView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" />
+
+</LinearLayout>

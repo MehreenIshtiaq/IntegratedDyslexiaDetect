@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="orange_app">#FF9800</color>
+    <color name="lime">#FAF0CD</color>
+    <color name="grey_button">#FFFFFFFF</color>
+    <color name="level_one_background">#E4B4A4</color> <!-- Example color for Level 1 -->
+    <color name="level_two_background">#B3EAF1</color> <!-- Example color for Level 2 -->
+    <color name="level_three_background">#ECE394</color> <!-- Example color for Level 3 -->
+    <color name="correct_answer">#00C853</color>
+    <color name="incorrect_answer">#D50000</color>
+    <color name="button_default">#C6FAAC3A</color> <!-- Example purple -->
+</resources>
