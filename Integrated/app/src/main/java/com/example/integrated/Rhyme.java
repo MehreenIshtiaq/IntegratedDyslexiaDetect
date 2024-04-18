@@ -148,7 +148,7 @@ public class Rhyme extends AppCompatActivity {
     private void validateOption(String selectedOption, Button clickedButton) {
         currentLevelTries++;
         totalTries++;
-        String url = "http://172.16.53.98:5000/submit_rhyming_answer";
+        String url = "http://192.168.10.8:5000/submit_rhyming_answer";
 
         try {
             JSONObject postData = new JSONObject();
@@ -193,7 +193,7 @@ public class Rhyme extends AppCompatActivity {
 
     // Method to submit score
     private void submitScore(int userId, int level, int score) {
-        String url = "http://172.16.53.98:5000/update_score";
+        String url = "http://192.168.10.8:5000/update_score";
         JSONObject postData = new JSONObject();
         try {
             postData.put("user_id", userId);
@@ -369,7 +369,7 @@ public class Rhyme extends AppCompatActivity {
 
 
     private void fetchRhymingTask(int level) {
-        String url = "http://172.16.53.98:5000/get_rhyming_task/" + level; // Ensure this URL matches your server
+        String url = "http://172.16.51.246:5000/get_rhyming_task/" + level; // Ensure this URL matches your server
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {

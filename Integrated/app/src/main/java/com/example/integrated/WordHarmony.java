@@ -193,7 +193,7 @@ public class WordHarmony extends AppCompatActivity {
     }
 
     private void submitScore(int userId, int level, int score) {
-        String url = "http://172.16.53.98:5000/submit_word_harmony_score";
+        String url = "http://172.16.51.246:5000/submit_word_harmony_score";
         JSONObject postData = new JSONObject();
         try {
             postData.put("user_id", userId);
@@ -215,7 +215,7 @@ public class WordHarmony extends AppCompatActivity {
 
 
     private void fetchWordHarmonyTask(int level) {
-        String url = "http://172.16.53.98:5000/get_word_harmony_task/" + level;
+        String url = "http://172.16.51.246:5000/get_word_harmony_task/" + level;
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {

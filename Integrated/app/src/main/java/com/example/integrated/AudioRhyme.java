@@ -5,11 +5,15 @@ import android.animation.Animator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -21,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -36,21 +41,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
-import com.airbnb.lottie.LottieAnimationView;
-import com.example.integrated.R;
-
 public class AudioRhyme extends AppCompatActivity {
     private static final String TAG = "AudioRhyme";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static final int MAX_LEVELS = 3;
     private static final int TASKS_PER_LEVEL = 5;
 
-    private TextView wordTextView, levelTextView, taskTextView, scoreTextView;
-    private Button recordButton, submitButton, btnPlay;
-
     private MediaPlayer successSound;
     private MediaPlayer failureSound;
     private LottieAnimationView animationView;
+
+
+    private TextView wordTextView, levelTextView, taskTextView, scoreTextView;
+    private Button recordButton, submitButton, btnPlay;
 
     private int currentLevel = 1;
     private int currentTask = 1;
@@ -64,9 +67,6 @@ public class AudioRhyme extends AppCompatActivity {
     private String fileName;
     private boolean isRecording = false;
 
-    public interface AnimationCompleteListener {
-        void onAnimationComplete();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,14 +77,14 @@ public class AudioRhyme extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
         }
 
+        initUI();
+
         // Initialize media players
         successSound = MediaPlayer.create(this, R.raw.success);
         failureSound = MediaPlayer.create(this, R.raw.failure);
 
         // Initialize the animation view from your layout
         animationView = findViewById(R.id.animation_view);
-
-        initUI();
 
         // Check if the activity is started with the intention to reset
         boolean shouldReset = getIntent().getBooleanExtra("reset", false);
@@ -250,7 +250,7 @@ public class AudioRhyme extends AppCompatActivity {
     }
 
     private void fetchWordAndOptions() {
-        String url = "http://172.16.53.98:5000/audio_rhyme/get_word?level=" + currentLevel;
+        String url = "http://172.16.51.246:5000/audio_rhyme/get_word?level=" + currentLevel;
         Log.d(TAG, "Fetching word and options for Level: " + currentLevel + ", Task: " + currentTask);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -295,7 +295,7 @@ public class AudioRhyme extends AppCompatActivity {
     }
 
     private void submitAudio() {
-        String url = "http://172.16.53.98:5000/audio_rhyme/submit?level=" + currentLevel + "&task=" + currentTask;
+        String url = "http://172.16.51.246:5000/audio_rhyme/submit?level=" + currentLevel + "&task=" + currentTask;
         Log.d(TAG, "Submitting audio for Level: " + currentLevel + ", Task: " + currentTask);
 
         Log.d(TAG, "File name: " + fileName);
@@ -338,71 +338,71 @@ public class AudioRhyme extends AppCompatActivity {
             currentLevelScore++;
         }
 
-        updateScoreDisplay(); // Update the score display
-
         if (currentTask == TASKS_PER_LEVEL) {
-            playSoundAndAnimation(isCorrect, new AnimationCompleteListener() {
+            double scoreRatio = (double) currentLevelScore / currentLevelTries;
+            boolean isSuccessAnimation = scoreRatio >= 0.4;
+
+            playSoundAndAnimation(isSuccessAnimation, new AnimationCompleteListener() {
                 @Override
                 public void onAnimationComplete() {
-                    if (isCorrect) {
-                        if (currentLevel == MAX_LEVELS) {
-                            showFinalResults(); // If it's the last level, show final results
-                        } else {
-                            currentLevel++; // Move to the next level
-                            currentTask = 1; // Reset tasks for the new level
-                            currentLevelScore = 0; // Reset score for the new level
-                            currentLevelTries = 0; // Reset tries for the new level
-                            fetchWordAndOptions(); // Fetch new words and options for the new level
-                            updateLevelTaskUI(); // Update the UI for the new level
-                        }
-                    } else {
-                        currentTask = 1; // Reset task count for retrying the level
-                        currentLevelScore = 0; // Reset score for retrying the level
-                        currentLevelTries = 0; // Reset tries for retrying the level
-                        fetchWordAndOptions(); // Fetch the same words and options for retrying the level
-                        updateLevelTaskUI(); // Update the UI for retrying the level
+                    // Submit the score regardless of being correct or incorrect
+                    SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                    String userId = prefs.getString("userId", "");
+                    if (!userId.isEmpty()) {
+                        int parsedUserId = Integer.parseInt(userId); // Ensure userId is correctly parsed as an int
+                        submitScore(parsedUserId, currentLevel, currentLevelScore);
                     }
+
+                    showLevelScoreAndDecideNextStep();
                 }
             });
         } else {
-            currentTask++; // Move to the next task within the same level
+            currentTask++;
             fetchWordAndOptions();
+        }
+        handleResponse(isCorrect, submitButton);
+    }
+
+    private void playSoundAndAnimation(boolean isSuccess, AnimationCompleteListener listener) {
+        MediaPlayer mediaPlayer = isSuccess ? successSound : failureSound;
+
+        if (isSuccess) {
+            mediaPlayer.start(); // Play the success sound
+            String animationFile = "success_animation.json";
+            animationView.setAnimation(animationFile); // Set the success animation
+            animationView.setVisibility(View.VISIBLE);
+            animationView.playAnimation();
+
+            new Handler().postDelayed(() -> {
+                animationView.setVisibility(View.GONE);
+                listener.onAnimationComplete(); // Call the listener once the animation ends
+            }, 5000); // Adjust the delay time as needed
+        } else {
+            Log.d(TAG, "Failure animation triggered"); // Add this line for debugging
+
+            mediaPlayer.start(); // Play the failure sound immediately
+
+            // Set the failure animation
+            String animationFile = "failure_animation.json";
+            animationView.setAnimation(animationFile);
+            animationView.setVisibility(View.VISIBLE);
+            animationView.playAnimation();
+
+            new Handler().postDelayed(() -> {
+                animationView.setVisibility(View.GONE);
+                listener.onAnimationComplete(); // Call the listener once the animation ends
+            }, 5000); // Adjust the delay time as needed
         }
     }
 
 
+    interface AnimationCompleteListener {
+        void onAnimationComplete();
+    }
 
-
-
-//    private void handleTaskResult(boolean isCorrect) {
-//        currentLevelTries++;
-//        totalTries++;
-//
-//        if (isCorrect) {
-//            correctTasks++;
-//            currentLevelScore++;
-//        }
-//
-//        if (currentTask == TASKS_PER_LEVEL) {
-//
-//            // Submit the score regardless of being correct or incorrect
-//            SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-//            String userId = prefs.getString("userId", "");
-//            if (!userId.isEmpty()) {
-//                int parsedUserId = Integer.parseInt(userId); // Ensure userId is correctly parsed as an int
-//                submitScore(parsedUserId, currentLevel, currentLevelScore);
-//            }
-//
-//            showLevelScoreAndDecideNextStep();
-//        } else {
-//            currentTask++;
-//            fetchWordAndOptions();
-//        }
-//        handleResponse(isCorrect, submitButton);
-//    }
 
     private void submitScore(int userId, int level, int score) {
-        String url = "http://172.16.53.98:5000/submit_audio_rhyme_score"; // Adjust the URL as needed
+        String url = "http://172.16.51.246:5000/submit_audio_rhyme_score"; // Adjust the URL as needed
         JSONObject postData = new JSONObject();
         try {
             postData.put("user_id", userId);
@@ -421,6 +421,7 @@ public class AudioRhyme extends AppCompatActivity {
     }
 
 
+
     private void handleResponse(boolean isCorrect, Button button) {
         int colorId = isCorrect ? R.color.correct_answer : R.color.incorrect_answer;
         button.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), colorId));
@@ -428,77 +429,30 @@ public class AudioRhyme extends AppCompatActivity {
         new Handler().postDelayed(() -> button.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.button_default)), 2000);
     }
 
+
     private void showLevelScoreAndDecideNextStep() {
+        AlertDialog.Builder builder =new AlertDialog.Builder(this);
         double scoreRatio = (double) currentLevelScore / currentLevelTries;
-        boolean isSuccess = scoreRatio >= 0.4; // Assuming 0.5 is the threshold for success
 
-        playSoundAndAnimation(isSuccess, new AnimationCompleteListener() {
-            @Override
-            public void onAnimationComplete() {
-                if (isSuccess) {
-                    if (currentLevel == MAX_LEVELS) {
-                        showFinalResults(); // Show final results if it was the last level
-                    } else {
-                        resetForNewLevel(); // Move to the next level
-                    }
-                } else {
-                    retryCurrentLevel(); // Retry the current level if not successful
-                }
+        String message = "Level " + currentLevel + " completed.\nYour score: " + currentLevelScore + "/" + currentLevelTries;
+        if (scoreRatio >= 0.4) {
+            if (currentLevel == MAX_LEVELS) {
+                message += "\nCongratulations! You've completed all levels.";
+                builder.setPositiveButton("Finish", (dialog, which) -> showFinalResults());
+            } else {
+                currentLevel++;
+                message += "\nMoving to the next level!";
+                builder.setPositiveButton("Next Level", (dialog, which) -> resetForNewLevel());
             }
-        });
+        } else {
+            message += "\nTry again to improve your score.";
+            builder.setPositiveButton("Retry Level", (dialog, which) -> retryCurrentLevel());
+        }
+
+        builder.setMessage(message);
+        builder.setCancelable(false);
+        builder.show();
     }
-
-
-//    private void showLevelScoreAndDecideNextStep() {
-//        AlertDialog.Builder builder =new AlertDialog.Builder(this);
-//        double scoreRatio = (double) currentLevelScore / currentLevelTries;
-//
-//        String message = "Level " + currentLevel + " completed.\nYour score: " + currentLevelScore + "/" + currentLevelTries;
-//        if (scoreRatio >= 0.2) {
-//            if (currentLevel == MAX_LEVELS) {
-//                message += "\nCongratulations! You've completed all levels.";
-//                builder.setPositiveButton("Finish", (dialog, which) -> showFinalResults());
-//            } else {
-//                currentLevel++;
-//                message += "\nMoving to the next level!";
-//                builder.setPositiveButton("Next Level", (dialog, which) -> resetForNewLevel());
-//            }
-//        } else {
-//            message += "\nTry again to improve your score.";
-//            builder.setPositiveButton("Retry Level", (dialog, which) -> retryCurrentLevel());
-//        }
-//
-//        builder.setMessage(message);
-//        builder.setCancelable(false);
-//        builder.show();
-//    }
-
-    private void playSoundAndAnimation(boolean isSuccess, AnimationCompleteListener listener) {
-        MediaPlayer mediaPlayer = isSuccess ? successSound : failureSound;
-        String animationFile = isSuccess ? "success_animation.json" : "failure_animation.json";
-
-        mediaPlayer.start(); // Play the appropriate sound
-        animationView.setAnimation(animationFile); // Set the appropriate animation
-        animationView.playAnimation();
-        animationView.addAnimatorListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {}
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                listener.onAnimationComplete(); // Call the listener once the animation ends
-                animationView.removeAllAnimatorListeners(); // Remove listeners to avoid memory leaks
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {}
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {}
-        });
-    }
-
-
 
     private void resetForNewLevel() {
         currentTask = 1;
@@ -543,21 +497,28 @@ public class AudioRhyme extends AppCompatActivity {
 
     private void updateUIForNewLevel() {
         LinearLayout rootLayout = findViewById(R.id.rootLayout); // Assuming this is your root layout
+        Drawable backgroundDrawable;
+
         switch (currentLevel) {
             case 1:
-                rootLayout.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.level_one_background));
+                backgroundDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.level_one);
                 break;
             case 2:
-                rootLayout.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.level_two_background));
+                backgroundDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.level_two);
                 break;
             case 3:
-                rootLayout.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.level_three_background));
+                backgroundDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.level_three);
                 break;
             default:
-                // Optional: Default background color if needed
+                backgroundDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.level_one);
                 break;
         }
+
+        if (backgroundDrawable != null) {
+            rootLayout.setBackground(backgroundDrawable);
+        }
     }
+
 
 
 
@@ -575,13 +536,8 @@ public class AudioRhyme extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (successSound != null) {
-            successSound.release();
-        }
-        if (failureSound != null) {
-            failureSound.release();
-        }
         stopRecording();
         releaseMediaPlayer();
     }
 }
+
