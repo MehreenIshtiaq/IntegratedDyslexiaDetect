@@ -4,6 +4,7 @@
     android:layout_width="100dp"
     android:layout_height="100dp"
     android:layout_gravity="center"
+    android:background="@drawable/cream_bg"
     app:cardCornerRadius="20dp"
     app:cardElevation="4dp">
 

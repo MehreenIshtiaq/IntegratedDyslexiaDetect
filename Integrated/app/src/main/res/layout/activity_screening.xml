@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/white"
+    android:background="@drawable/cream_bg"
     android:layout_height="match_parent"
     tools:context=".Screening">
 
@@ -19,7 +19,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#FFA500"
+            android:background="#C6FAAC3A"
             app:titleTextColor="@android:color/white">
 
             <RelativeLayout
@@ -31,8 +31,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:padding="8dp"
                     android:src="@drawable/img_dyslexialogo1" />
 
                 <TextView
@@ -40,21 +38,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_toEndOf="@id/logoImageView"
-                    android:paddingStart="8dp"
+                    android:layout_marginStart="90dp"
                     android:text="DyslexiaDetect"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp" />
+                    android:textColor="@android:color/black"
+                    android:textSize="25sp" />
 
-                <ImageView
-                    android:id="@+id/profileImageView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:padding="8dp"
-                    android:src="@drawable/img_dyslexialogo1" />
+
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>

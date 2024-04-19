@@ -222,7 +222,7 @@ def submit_word_harmony_score():
 
 # Initialize Google Cloud Speech client
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'C:/Users/Anam/Downloads/dyslexiadetectfyp-a2e09a1eefb2.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'C:/Users/wasay/Downloads/dyslexiadetectfyp-a2e09a1eefb2.json'
 speech_client = speech.SpeechClient()
 
 

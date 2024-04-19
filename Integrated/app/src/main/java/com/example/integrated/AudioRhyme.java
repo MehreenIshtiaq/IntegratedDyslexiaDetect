@@ -250,7 +250,7 @@ public class AudioRhyme extends AppCompatActivity {
     }
 
     private void fetchWordAndOptions() {
-        String url = "http://172.16.51.246:5000/audio_rhyme/get_word?level=" + currentLevel;
+        String url = "http://192.168.10.7:5000/audio_rhyme/get_word?level=" + currentLevel;
         Log.d(TAG, "Fetching word and options for Level: " + currentLevel + ", Task: " + currentTask);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -295,7 +295,7 @@ public class AudioRhyme extends AppCompatActivity {
     }
 
     private void submitAudio() {
-        String url = "http://172.16.51.246:5000/audio_rhyme/submit?level=" + currentLevel + "&task=" + currentTask;
+        String url = "http://192.168.10.7:5000/audio_rhyme/submit?level=" + currentLevel + "&task=" + currentTask;
         Log.d(TAG, "Submitting audio for Level: " + currentLevel + ", Task: " + currentTask);
 
         Log.d(TAG, "File name: " + fileName);
@@ -402,7 +402,7 @@ public class AudioRhyme extends AppCompatActivity {
 
 
     private void submitScore(int userId, int level, int score) {
-        String url = "http://172.16.51.246:5000/submit_audio_rhyme_score"; // Adjust the URL as needed
+        String url = "http://192.168.10.7:5000/submit_audio_rhyme_score"; // Adjust the URL as needed
         JSONObject postData = new JSONObject();
         try {
             postData.put("user_id", userId);
@@ -500,9 +500,6 @@ public class AudioRhyme extends AppCompatActivity {
         Drawable backgroundDrawable;
 
         switch (currentLevel) {
-            case 1:
-                backgroundDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.level_one);
-                break;
             case 2:
                 backgroundDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.level_two);
                 break;
